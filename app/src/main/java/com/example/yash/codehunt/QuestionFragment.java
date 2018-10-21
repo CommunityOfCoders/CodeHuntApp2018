@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class QuestionFragment extends Fragment {
-    private static final String TAB = "QuestionFragment";
+    private static final String TAG = "QuestionFragment";
 
     private TextView questionNumber;
     private EditText passCode;
@@ -49,6 +49,11 @@ public class QuestionFragment extends Fragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (passCode.getText().toString().equals("")) {
+                    Toast.makeText(getActivity().getApplicationContext(), "ENTER PASSCODE", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 int code = Integer.parseInt(passCode.getText().toString());
                 passCode.setText("");
