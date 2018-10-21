@@ -1,31 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CodehuntActivity"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
+    tools:context=".CodehuntActivity">
+    <ImageView
+        android:id="@+id/CoCImage"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="CODEHUNT 2018"
-        android:gravity="center"
+        android:src=""
+        android:contentDescription="@string/app_name"
+        android:layout_margin="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+        android:id="@+id/CodeHuntTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
         android:textColor="#EF5350"
-        android:background="#FFFFFF"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/CoCImage"
+        android:layout_marginTop="48dp"
+        android:textAlignment="center"
         android:textSize="64sp"/>
-
     <TextView
-        android:id="@+id/start"
-        android:layout_width="match_parent"
+        android:id="@+id/NameTV"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="START"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:layout_marginTop="48dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/CodeHuntTV"
+        android:text="Please enter your team name:"/>
+    <EditText
+        android:id="@+id/TeamNameET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/NameTV"/>
+    <Button
+        android:id="@+id/start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="START!"
+        android:onClick="onClickStart"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="20dp"
         android:textSize="28sp"
         android:textAlignment="textEnd"
-        android:padding="28dp"
-        android:textColor="#7CB342"
-        android:background="#FFFFFF"/>
-</LinearLayout >
+        android:textColor="#7CB342"/>
+</android.support.constraint.ConstraintLayout >
