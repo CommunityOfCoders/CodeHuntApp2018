@@ -9,7 +9,7 @@
         android:id="@+id/CoCImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src=""
+        android:src="@drawable/CoCLogo"
         android:contentDescription="@string/app_name"
         android:layout_margin="16dp"
         app:layout_constraintLeft_toLeftOf="parent"

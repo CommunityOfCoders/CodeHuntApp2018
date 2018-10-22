@@ -1,10 +1,14 @@
 package com.example.yash.codehunt;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,97 +17,160 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Objects;
+
+import static android.content.Context.CONTEXT_IGNORE_SECURITY;
+import static android.content.Context.MODE_PRIVATE;
+
 public class QuestionFragment extends Fragment {
     private static final String TAG = "QuestionFragment";
-
     private TextView questionNumber;
     private EditText passCode;
     private Button nextButton;
     private Button hintsButton;
-
-    // lab3 -> NetLab -> VLSILab -> NCC -> Lab3Q1 -> Lab3Q2 -> END
-    private int[] passcodes = { 124067, 834592, 348215, 783152, 672153, 681354 };
+    SharedPreferences pref;
+    private int[] passcodes = {124067, 834592, 348215, 783152, 672153, 681354};
     private String[] questions = {
             "GET CODIN!",          // Lab3 -> NetLab           // 124067
             "SCRAM - UNSCRAM",      // NetLab -> VLSILab        // 834592
             "RIDDLE",               // VLSILab -> NCC           // 348215
             "CIPHER",               // NCC -> Lab3Q1            // 783152
-            "IS SYMM?",             // Lab3Q1 -> Lab3Q2         // 672153
+            "THE MATRIX",             // Lab3Q1 -> Lab3Q2         // 672153
             "INV COUNT"              // Lab3Q2 -> END            // 681354
     };
-    private int curr_question = 0;
-    private int hints = 0;
+    private int curr_question; // Real_Q - 1
+    private int curr_hints;
+    private long curr_start_time;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.question_fragment, container, false);
-
         questionNumber = view.findViewById(R.id.question_number);
         passCode = view.findViewById(R.id.passcode);
         nextButton = view.findViewById(R.id.next);
         hintsButton = view.findViewById(R.id.hints);
+        pref = Objects.requireNonNull(getContext()).getSharedPreferences(Constants.SP, MODE_PRIVATE);
+
+        curr_question = pref.getInt(Constants.CurrentQuestion, 0); // Real_Q-1
+        curr_hints = pref.getInt(Constants.Hints, 0);
+        curr_start_time = pref.getLong("Q" + Integer.toString(curr_question) + "Time", 0);
+
+        if (curr_question >= 6) {
+            Intent i = new Intent(getContext(), Finish.class);
+            startActivity(i);
+//            return view;
+        }
 
         questionNumber.setText(questions[curr_question]);
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (passCode.getText().toString().equals("")) {
-                    Toast.makeText(getActivity().getApplicationContext(), "ENTER PASSCODE", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 int code = Integer.parseInt(passCode.getText().toString());
                 passCode.setText("");
-                passCode.setHint("PASSCODE");
-
+                passCode.setHint("Passcode");
                 if (curr_question < 6 && code == passcodes[curr_question]) {
-
-                    // update the database
-                    // update hints, ques_solved, time
-
-
-                    // reseting hints to 0
-                    hints = 0;
-
-                    // updating the app
+                    long time = Math.round(System.currentTimeMillis() / 1000);
                     curr_question++;
+                    int tot_hints = pref.getInt(Constants.TotalHints, 0) + curr_hints;
 
-                    // if all questions solved
-                    if (curr_question == 6) {
-                        Toast.makeText(getActivity().getApplicationContext(), "WOAH YOU DID IT", Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putInt(Constants.CurrentQuestion, curr_question);
+                    editor.putInt(Constants.Hints, 0);
+                    editor.putLong("Q" + Integer.toString(curr_question) + "Time", time); // end time of ques no. curr_ques
+                    editor.putInt(Constants.TotalHints, tot_hints);
+                    editor.commit();
 
-                        // For now returning to start of App TODO go to Finish activity
-                        Intent intent = new Intent(getActivity(), CodehuntActivity.class);
-                        getActivity().startActivity(intent);
-                    }
-                    else {
-                        Toast.makeText(getActivity().getApplicationContext(), "SOLVE NEXT!", Toast.LENGTH_SHORT).show();
+                    updateFBDB(curr_question, curr_hints);
+                    curr_hints = 0;
+                    curr_start_time = time;
+
+                    if (curr_question == 6) {   // all questions solved
+                        Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getActivity(), Finish.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_SHORT).show();
                         questionNumber.setText(questions[curr_question]);
                     }
-                }
-                else {
-                    Toast.makeText(getActivity().getApplicationContext(), "INCORRECT", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Incorrect", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
         hintsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hints < 3) {
-                    Toast.makeText(getActivity().getApplicationContext(), "GIVE HINT", Toast.LENGTH_SHORT).show();
-                    hints++;
-                }
-                else {
-                    Toast.makeText(getActivity().getApplicationContext(), "NO HINTS LEFT", Toast.LENGTH_SHORT).show();
-
+                if (curr_hints < 3) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                    alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
+                    alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getContext(), "Ask a volunteer to give you a hint", Toast.LENGTH_SHORT).show();
+                            curr_hints++;
+                        }
+                    });
+                    alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                } else {
+                    Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
         return view;
+    }
+
+    private void updateFBDB(final int curr_question, final int current_hints) {
+        final DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
+        final String key = pref.getString(Constants.Key, Constants.Key);
+        teams.child(key).child(Constants.FB_TotalTime).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Integer tot_time = dataSnapshot.getValue(Integer.class);
+                teams.child(key).child(Constants.FB_CurrentQues).setValue(curr_question + 1);
+                // did curr_ques
+                int time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
+                        pref.getLong("Q" + (curr_question - 1) + "Time", 0));
+                time += calc_hint_time(current_hints);
+                tot_time += time;
+                teams.child(key).child("q" + curr_question).setValue(time);
+                teams.child(key).child(Constants.FB_TotalTime).setValue(tot_time);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+
+    private int calc_hint_time(int hints) {
+        switch (hints) {
+            case 1:
+                return 180;
+            case 2:
+                return 180 * 2 + 120;
+            case 3:
+                return 180 * 3 + 120;
+            default:
+                return 0;
+        }
     }
 }

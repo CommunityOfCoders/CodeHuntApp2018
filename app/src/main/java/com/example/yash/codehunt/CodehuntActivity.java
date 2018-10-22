@@ -17,16 +17,29 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class CodehuntActivity extends AppCompatActivity {
     private TextView TeamNameET;
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        pref = getApplicationContext().getSharedPreferences(Constants.SP, MODE_PRIVATE);
+        String TN = pref.getString(Constants.TeamName, Constants.TeamName);
+        if(!TN.equals(Constants.TeamName)) {
+            Intent intent = new Intent(CodehuntActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
         setContentView(R.layout.activity_codehunt);
         TeamNameET = findViewById(R.id.TeamNameET);
     }
 
     public void onClickStart(View v) {
         final String teamName = TeamNameET.getText().toString().trim();
+        if(pref.getInt(Constants.CurrentQuestion,0) >= 6) {
+            Intent i = new Intent(this, Finish.class);
+            startActivity(i);
+            finish();
+        }
         if (!teamName.equals("")) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setMessage("Ready?");
@@ -51,14 +64,13 @@ public class CodehuntActivity extends AppCompatActivity {
     }
 
     void init(String teamName) {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences(Constants.SP, MODE_PRIVATE);
         String tN = pref.getString(Constants.TeamName, Constants.TeamName);
         if (tN.equals(Constants.TeamName)) { // This is the first time
             SharedPreferences.Editor editor = pref.edit();
             editor.putString(Constants.TeamName, teamName);
 
             long startTime = Math.round(System.currentTimeMillis() / 1000);
-            editor.putLong(Constants.StartTime, startTime);
+            editor.putLong("Q0Time", startTime);
 
             DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
             String key = teams.push().getKey();

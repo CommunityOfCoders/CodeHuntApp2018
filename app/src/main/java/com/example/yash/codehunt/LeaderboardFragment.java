@@ -73,8 +73,10 @@ public class LeaderboardFragment extends Fragment {
 
     class SortTeamData implements Comparator<TeamData> {
         public int compare(TeamData a, TeamData b) {
+            // ascending in terms of time
+            // desc in terms of current_ques
             if (a.current_ques != b.current_ques) {
-                return (a.current_ques - b.current_ques) * 10000000;
+                return (a.current_ques - b.current_ques) * -10000000;
             } else
                 return a.total_time - b.total_time;
         }
