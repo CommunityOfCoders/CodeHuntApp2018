@@ -1,5 +1,6 @@
 package com.example.yash.codehunt;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,6 +8,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class CodehuntActivity extends AppCompatActivity {
     private TextView TeamNameET;
+    private static final String TAG = "CodehuntActivity";
     private SharedPreferences pref;
 
     @Override
@@ -47,6 +50,7 @@ public class CodehuntActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     init(teamName);
+                    Log.e(TAG, "onClick: TeamName"+teamName );
                     Intent intent = new Intent(CodehuntActivity.this, MainActivity.class);
                     Toast.makeText(CodehuntActivity.this, "All the Best!", Toast.LENGTH_SHORT).show();
                     startActivity(intent);
@@ -63,6 +67,7 @@ public class CodehuntActivity extends AppCompatActivity {
             Toast.makeText(this, "Please Enter Your Team Name!", Toast.LENGTH_SHORT).show();
     }
 
+    @SuppressLint("ApplySharedPref")
     void init(String teamName) {
         String tN = pref.getString(Constants.TeamName, Constants.TeamName);
         if (tN.equals(Constants.TeamName)) { // This is the first time

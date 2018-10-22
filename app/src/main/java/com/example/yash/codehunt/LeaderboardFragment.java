@@ -34,8 +34,8 @@ public class LeaderboardFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.leaderboard_fragment, container, false);
         leaderboardLinearLayout = view.findViewById(R.id.leaderboardLinearLayout);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         database = FirebaseDatabase.getInstance();
-        database.setPersistenceEnabled(true);
         teamDataArrayList = new ArrayList<>();
         DatabaseReference teams = database.getReference("teams");
         teams.keepSynced(true);

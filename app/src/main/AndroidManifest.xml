@@ -4,9 +4,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/CoCLogo"
+        android:icon="@drawable/coc_logo"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/CoCLogo"
+        android:roundIcon="@drawable/coc_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity

@@ -149,11 +149,13 @@ public class QuestionFragment extends Fragment {
                 int time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
                         pref.getLong("Q" + (curr_question - 1) + "Time", 0));
                 time += calc_hint_time(current_hints);
-                tot_time += time;
                 teams.child(key).child("q" + curr_question).setValue(time);
-                teams.child(key).child(Constants.FB_TotalTime).setValue(tot_time);
-            }
+                try {
+                    tot_time += time;
+                    teams.child(key).child(Constants.FB_TotalTime).setValue(tot_time);
+                } catch (NullPointerException e) {}
 
+            }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.w(TAG, "Failed to read value.", error.toException());

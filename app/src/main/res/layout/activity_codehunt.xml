@@ -5,45 +5,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CodehuntActivity">
+
     <ImageView
         android:id="@+id/CoCImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/CoCLogo"
-        android:contentDescription="@string/app_name"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_margin="16dp"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitCenter"
+        android:src="@drawable/coc_logo"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/CodeHuntTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:text="@string/app_name"
+        android:textAlignment="center"
         android:textColor="#EF5350"
+        android:textSize="64sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/CoCImage"
-        android:layout_marginTop="48dp"
-        android:textAlignment="center"
-        android:textSize="64sp"/>
+        app:layout_constraintTop_toBottomOf="@id/CoCImage" />
+
     <TextView
         android:id="@+id/NameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Please enter your team name:"
         android:textColor="#000000"
         android:textSize="20sp"
-        android:layout_marginTop="48dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/CodeHuntTV"
-        android:text="Please enter your team name:"/>
+        app:layout_constraintTop_toBottomOf="@+id/CodeHuntTV" />
     <EditText
         android:id="@+id/TeamNameET"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:textAlignment="center"
+        android:imeOptions="actionGo"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/NameTV"/>

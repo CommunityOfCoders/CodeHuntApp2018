@@ -10,7 +10,6 @@ public class TeamData {
     public String name;
     public long start_time;
     public int current_ques, total_time, q1, q2, q3, q4, q5, q6;
-
     public TeamData(String name, int current_ques, long start_time, int total_time,
                     int q1, int q2, int q3, int q4, int q5, int q6) {
         this.name = name;
@@ -25,7 +24,9 @@ public class TeamData {
         this.q6 = q6;
     }
 
-    public TeamData() {}
+    public TeamData() {
+        // Default constructor required for calls to DataSnapshot.getValue(TeamData.class)
+    }
 
     @Exclude
     public Map<String, Object> toMap() {
