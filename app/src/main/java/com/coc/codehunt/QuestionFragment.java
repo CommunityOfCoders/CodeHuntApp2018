@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -56,14 +56,15 @@ public class QuestionFragment extends Fragment {
         passCode = view.findViewById(R.id.passcode);
         nextButton = view.findViewById(R.id.next);
         hintsButton = view.findViewById(R.id.hints);
-        pref = Objects.requireNonNull(getContext()).getSharedPreferences(Constants.SP, MODE_PRIVATE);
+        pref = Objects.requireNonNull(getContext()).getSharedPreferences(com.coc.codehunt.Constants.SP, MODE_PRIVATE);
 
-        curr_question = pref.getInt(Constants.CurrentQuestion, 0); // Real_Q-1
-        curr_hints = pref.getInt(Constants.Hints, 0);
+        curr_question = pref.getInt(com.coc.codehunt.Constants.CurrentQuestion, 0); // Real_Q-1
+        curr_hints = pref.getInt(com.coc.codehunt.Constants.Hints, 0);
         curr_start_time = pref.getLong("Q" + Integer.toString(curr_question) + "Time", 0);
+        Log.e(TAG, String.format("onCreateView: %d, %d, %d", curr_question, curr_hints, curr_start_time));
 
         if (curr_question >= 6) {
-            Intent i = new Intent(getContext(), Finish.class);
+            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
             startActivity(i);
 //            return view;
         }
@@ -83,14 +84,16 @@ public class QuestionFragment extends Fragment {
                 if (curr_question < 6 && code == passcodes[curr_question]) {
                     long time = Math.round(System.currentTimeMillis() / 1000);
                     curr_question++;
-                    int tot_hints = pref.getInt(Constants.TotalHints, 0) + curr_hints;
+                    int tot_hints = pref.getInt(com.coc.codehunt.Constants.TotalHints, 0) + curr_hints;
+                    Log.e(TAG, "onClick: tot_hints = "+tot_hints );
 
                     SharedPreferences.Editor editor = pref.edit();
-                    editor.putInt(Constants.CurrentQuestion, curr_question);
-                    editor.putInt(Constants.Hints, 0);
+                    editor.putInt(com.coc.codehunt.Constants.CurrentQuestion, curr_question);
+                    editor.putInt(com.coc.codehunt.Constants.Hints, 0);
                     editor.putLong("Q" + Integer.toString(curr_question) + "Time", time); // end time of ques no. curr_ques
-                    editor.putInt(Constants.TotalHints, tot_hints);
+                    editor.putInt(com.coc.codehunt.Constants.TotalHints, tot_hints);
                     editor.commit();
+                    Log.e(TAG, String.format("onClick: %d, %d, %d, %d", curr_question, 0, time, tot_hints));
 
                     updateFBDB(curr_question, curr_hints);
                     curr_hints = 0;
@@ -98,7 +101,7 @@ public class QuestionFragment extends Fragment {
 
                     if (curr_question == 6) {   // all questions solved
                         Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getActivity(), Finish.class);
+                        Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
                         startActivity(intent);
                     } else {
                         Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_SHORT).show();
@@ -139,20 +142,24 @@ public class QuestionFragment extends Fragment {
 
     private void updateFBDB(final int curr_question, final int current_hints) {
         final DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
-        final String key = pref.getString(Constants.Key, Constants.Key);
-        teams.child(key).child(Constants.FB_TotalTime).addListenerForSingleValueEvent(new ValueEventListener() {
+        final String key = pref.getString(com.coc.codehunt.Constants.Key, com.coc.codehunt.Constants.Key);
+        Log.e(TAG, "updateFBDB: key = "+key);
+        teams.child(key).child(com.coc.codehunt.Constants.FB_TotalTime).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Integer tot_time = dataSnapshot.getValue(Integer.class);
-                teams.child(key).child(Constants.FB_CurrentQues).setValue(curr_question + 1);
+                teams.child(key).child(com.coc.codehunt.Constants.FB_CurrentQues).setValue(curr_question + 1);
+                Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
                 // did curr_ques
                 int time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
                         pref.getLong("Q" + (curr_question - 1) + "Time", 0));
                 time += calc_hint_time(current_hints);
                 teams.child(key).child("q" + curr_question).setValue(time);
+                Log.e(TAG, "onDataChange: q" + curr_question +" = "+ time);
                 try {
                     tot_time += time;
-                    teams.child(key).child(Constants.FB_TotalTime).setValue(tot_time);
+                    teams.child(key).child(com.coc.codehunt.Constants.FB_TotalTime).setValue(tot_time);
+                    Log.e(TAG, "onDataChange: tot_time = "+tot_time );
                 } catch (NullPointerException e) {}
 
             }

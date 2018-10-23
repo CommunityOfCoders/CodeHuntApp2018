@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -34,7 +34,7 @@ public class LeaderboardFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.leaderboard_fragment, container, false);
         leaderboardLinearLayout = view.findViewById(R.id.leaderboardLinearLayout);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+//        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         database = FirebaseDatabase.getInstance();
         teamDataArrayList = new ArrayList<>();
         DatabaseReference teams = database.getReference("teams");
@@ -57,9 +57,10 @@ public class LeaderboardFragment extends Fragment {
 
                 int rank = -1;
                 for (TeamData team : teamDataArrayList) {
-                    leaderboardLinearLayout.addView(new LeaderboardRow(
-                            getContext(), team.name, Integer.toString(++rank),
-                            Integer.toString(team.current_ques), Integer.toString(team.total_time)));
+                    if(team.name!= null && !team.name.trim().equals(""))
+                        leaderboardLinearLayout.addView(new LeaderboardRow(
+                                getContext(), team.name, Integer.toString(++rank),
+                                Integer.toString(team.current_ques), Integer.toString(team.total_time)));
                 }
             }
 

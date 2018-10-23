@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

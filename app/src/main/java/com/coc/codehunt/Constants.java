@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 public class Constants {
     public static final String SP = "SP";

@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;

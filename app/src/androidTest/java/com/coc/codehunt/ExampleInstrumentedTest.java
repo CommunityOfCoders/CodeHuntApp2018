@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

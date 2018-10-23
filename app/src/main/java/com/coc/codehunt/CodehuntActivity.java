@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -27,6 +27,7 @@ public class CodehuntActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         pref = getApplicationContext().getSharedPreferences(Constants.SP, MODE_PRIVATE);
         String TN = pref.getString(Constants.TeamName, Constants.TeamName);
+        Log.e(TAG, "onCreate: Team Name = "+TN);
         if(!TN.equals(Constants.TeamName)) {
             Intent intent = new Intent(CodehuntActivity.this, MainActivity.class);
             startActivity(intent);
@@ -38,6 +39,7 @@ public class CodehuntActivity extends AppCompatActivity {
 
     public void onClickStart(View v) {
         final String teamName = TeamNameET.getText().toString().trim();
+        Log.e(TAG, "onClickStart: CurrQues = "+pref.getInt(Constants.CurrentQuestion,0));
         if(pref.getInt(Constants.CurrentQuestion,0) >= 6) {
             Intent i = new Intent(this, Finish.class);
             startActivity(i);
@@ -70,16 +72,21 @@ public class CodehuntActivity extends AppCompatActivity {
     @SuppressLint("ApplySharedPref")
     void init(String teamName) {
         String tN = pref.getString(Constants.TeamName, Constants.TeamName);
+        Log.e(TAG, "init: tN = " + tN);
         if (tN.equals(Constants.TeamName)) { // This is the first time
             SharedPreferences.Editor editor = pref.edit();
             editor.putString(Constants.TeamName, teamName);
+            Log.e(TAG, "init: TN = "+teamName);
 
             long startTime = Math.round(System.currentTimeMillis() / 1000);
             editor.putLong("Q0Time", startTime);
+            Log.e(TAG, "init: Q0Time = "+startTime);
 
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
             DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
             String key = teams.push().getKey();
             editor.putString(Constants.Key, key);
+            Log.e(TAG, "init: key = "+key);
             TeamData team = new TeamData(teamName, 1, startTime, 0, -1, -1, -1, -1, -1, -1);
             teams.child(key).setValue(team);
             editor.commit();

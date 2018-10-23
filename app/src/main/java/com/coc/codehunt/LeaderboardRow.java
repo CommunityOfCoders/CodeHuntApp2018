@@ -1,4 +1,4 @@
-package com.example.yash.codehunt;
+package com.coc.codehunt;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
