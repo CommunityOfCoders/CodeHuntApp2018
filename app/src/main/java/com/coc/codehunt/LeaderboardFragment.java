@@ -60,7 +60,7 @@ public class LeaderboardFragment extends Fragment {
                     if(team.name!= null && !team.name.trim().equals(""))
                         leaderboardLinearLayout.addView(new LeaderboardRow(
                                 getContext(), team.name, Integer.toString(++rank),
-                                Integer.toString(team.current_ques), Integer.toString(team.total_time)));
+                                Integer.toString(team.current_ques), Integer.toString(team.getTotalTime())));
                 }
             }
 
@@ -79,7 +79,7 @@ public class LeaderboardFragment extends Fragment {
             if (a.current_ques != b.current_ques) {
                 return (a.current_ques - b.current_ques) * -10000000;
             } else
-                return a.total_time - b.total_time;
+                return a.getTotalTime() - b.getTotalTime();
         }
     }
 }

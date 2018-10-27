@@ -1,5 +1,6 @@
 package com.coc.codehunt;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,6 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import static android.content.Context.CONTEXT_IGNORE_SECURITY;
@@ -55,67 +57,67 @@ public class QuestionFragment extends Fragment {
         questionNumber = view.findViewById(R.id.question_number);
         passCode = view.findViewById(R.id.passcode);
         nextButton = view.findViewById(R.id.next);
-        hintsButton = view.findViewById(R.id.hints);
-        pref = Objects.requireNonNull(getContext()).getSharedPreferences(com.coc.codehunt.Constants.SP, MODE_PRIVATE);
+        hintsButton = view.findViewById(R.id.hintsButton);
+        pref = getContext().getSharedPreferences(com.coc.codehunt.Constants.SP, MODE_PRIVATE);
 
         curr_question = pref.getInt(com.coc.codehunt.Constants.CurrentQuestion, 0); // Real_Q-1
-        curr_hints = pref.getInt(com.coc.codehunt.Constants.Hints, 0);
-        curr_start_time = pref.getLong("Q" + Integer.toString(curr_question) + "Time", 0);
+        curr_hints = pref.getInt("Q" + (curr_question + 1) + "Hints", 0);
+        curr_start_time = pref.getLong("Q" + curr_question + "Time", 0);
         Log.e(TAG, String.format("onCreateView: %d, %d, %d", curr_question, curr_hints, curr_start_time));
 
         if (curr_question >= 6) {
             Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
             startActivity(i);
-//            return view;
         }
-
+        hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
         questionNumber.setText(questions[curr_question]);
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (passCode.getText().toString().equals("")) {
-                    Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                int code = Integer.parseInt(passCode.getText().toString());
-                passCode.setText("");
-                passCode.setHint("Passcode");
-                if (curr_question < 6 && code == passcodes[curr_question]) {
-                    long time = Math.round(System.currentTimeMillis() / 1000);
-                    curr_question++;
-                    int tot_hints = pref.getInt(com.coc.codehunt.Constants.TotalHints, 0) + curr_hints;
-                    Log.e(TAG, "onClick: tot_hints = "+tot_hints );
+            if (passCode.getText().toString().equals("")) {
+                Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int code = Integer.parseInt(passCode.getText().toString());
+            passCode.setText("");
+            passCode.setHint("Passcode");
+            if (curr_question < 6 && code == passcodes[curr_question]) {
+                long time = Math.round(System.currentTimeMillis() / 1000);
+                curr_question++;
 
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putInt(com.coc.codehunt.Constants.CurrentQuestion, curr_question);
-                    editor.putInt(com.coc.codehunt.Constants.Hints, 0);
-                    editor.putLong("Q" + Integer.toString(curr_question) + "Time", time); // end time of ques no. curr_ques
-                    editor.putInt(com.coc.codehunt.Constants.TotalHints, tot_hints);
-                    editor.commit();
-                    Log.e(TAG, String.format("onClick: %d, %d, %d, %d", curr_question, 0, time, tot_hints));
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt(Constants.CurrentQuestion, curr_question);
+                editor.putInt("Q" + curr_question + "Hints", curr_hints);
+                editor.putLong("Q" + curr_question + "Time", time); // end time of ques no. curr_ques
+                editor.commit();
+                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
 
-                    updateFBDB(curr_question, curr_hints);
-                    curr_hints = 0;
-                    curr_start_time = time;
+                updateFBDB(curr_question, curr_hints);
+                curr_hints = 0;
+                curr_start_time = time;
 
-                    if (curr_question == 6) {   // all questions solved
-                        Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_SHORT).show();
-                        questionNumber.setText(questions[curr_question]);
-                    }
+                if (curr_question == 6) {   // all questions solved
+                    Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
+                    startActivity(intent);
                 } else {
-                    Toast.makeText(getContext(), "Incorrect", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_SHORT).show();
+                    questionNumber.setText(questions[curr_question]);
+                    hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
                 }
+            } else {
+                Toast.makeText(getContext(), "Incorrect Passcode", Toast.LENGTH_SHORT).show();
+            }
             }
         });
+
         hintsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (curr_hints < 3) {
+            if (curr_hints < 3) {
+                long time = Math.round(System.currentTimeMillis() / 1000);
+                if(time >= curr_start_time + (curr_hints+1)*300) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                     alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
                     alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -123,6 +125,8 @@ public class QuestionFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                             Toast.makeText(getContext(), "Ask a volunteer to give you a hint", Toast.LENGTH_SHORT).show();
                             curr_hints++;
+                            pref.edit().putInt("Q" + curr_question + "Hints", curr_hints).commit();
+                            hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
                         }
                     });
                     alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -130,11 +134,30 @@ public class QuestionFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                         }
                     });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                } else {
-                    Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_SHORT).show();
+                    alertDialogBuilder.create().show();
                 }
+                else {
+                    Toast.makeText(getContext(), "Think!\nThere's still time before you are allowed to take a hint", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_SHORT).show();
+            }
+            }
+        });
+        view.findViewById(R.id.rulesButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog dialog = new Dialog(getContext());
+                dialog.setContentView(R.layout.rules_dialog_layout);
+                dialog.setTitle("Rules About Hints");
+                TextView dialogButton = dialog.findViewById(R.id.dialogOK);
+                dialogButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
             }
         });
         return view;
@@ -143,43 +166,15 @@ public class QuestionFragment extends Fragment {
     private void updateFBDB(final int curr_question, final int current_hints) {
         final DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
         final String key = pref.getString(com.coc.codehunt.Constants.Key, com.coc.codehunt.Constants.Key);
-        Log.e(TAG, "updateFBDB: key = "+key);
-        teams.child(key).child(com.coc.codehunt.Constants.FB_TotalTime).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Integer tot_time = dataSnapshot.getValue(Integer.class);
-                teams.child(key).child(com.coc.codehunt.Constants.FB_CurrentQues).setValue(curr_question + 1);
-                Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
-                // did curr_ques
-                int time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
-                        pref.getLong("Q" + (curr_question - 1) + "Time", 0));
-                time += calc_hint_time(current_hints);
-                teams.child(key).child("q" + curr_question).setValue(time);
-                Log.e(TAG, "onDataChange: q" + curr_question +" = "+ time);
-                try {
-                    tot_time += time;
-                    teams.child(key).child(com.coc.codehunt.Constants.FB_TotalTime).setValue(tot_time);
-                    Log.e(TAG, "onDataChange: tot_time = "+tot_time );
-                } catch (NullPointerException e) {}
+        Log.e(TAG, "updateFBDB: key = " + key);
+        teams.child(key).child(Constants.FB_CurrentQues).setValue(curr_question + 1);
+        long time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
+                pref.getLong("Q" + (curr_question - 1) + "Time", 0));
+        time += TeamData.calc_hint_time(current_hints);
+        teams.child(key).child("q" + curr_question).setValue(time);
 
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
+        Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
+        Log.e(TAG, "onDataChange: q" + curr_question + " = " + time);
     }
 
-    private int calc_hint_time(int hints) {
-        switch (hints) {
-            case 1:
-                return 180;
-            case 2:
-                return 180 * 2 + 120;
-            case 3:
-                return 180 * 3 + 120;
-            default:
-                return 0;
-        }
-    }
 }

@@ -87,7 +87,7 @@ public class CodehuntActivity extends AppCompatActivity {
             String key = teams.push().getKey();
             editor.putString(Constants.Key, key);
             Log.e(TAG, "init: key = "+key);
-            TeamData team = new TeamData(teamName, 1, startTime, 0, -1, -1, -1, -1, -1, -1);
+            TeamData team = new TeamData(teamName, 1, startTime, -1, -1, -1, -1, -1, -1);
             teams.child(key).setValue(team);
             editor.commit();
         }
