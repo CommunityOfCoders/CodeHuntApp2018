@@ -63,7 +63,7 @@
         android:id="@+id/passcode"
         android:layout_width="266dp"
         android:layout_height="wrap_content"
-        android:ems="10"
+        android:imeOptions="actionGo"
         android:gravity="center"
         android:hint="Passcode"
         android:layout_marginTop="36dp"

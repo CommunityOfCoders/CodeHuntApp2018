@@ -10,9 +10,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -72,43 +74,22 @@ public class QuestionFragment extends Fragment {
         hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
         questionNumber.setText(questions[curr_question]);
 
+        passCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_GO) {
+                    onClickNext();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (passCode.getText().toString().equals("")) {
-                    Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                int code = Integer.parseInt(passCode.getText().toString());
-                passCode.setText("");
-                passCode.setHint("Passcode");
-                if (curr_question < 6 && code == passcodes[curr_question]) {
-                    long time = Math.round(System.currentTimeMillis() / 1000);
-                    curr_question++;
-
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putInt(Constants.CurrentQuestion, curr_question);
-                    editor.putInt("Q" + curr_question + "Hints", curr_hints);
-                    editor.putLong("Q" + curr_question + "Time", time); // end time of ques no. curr_ques
-                    editor.commit();
-                    Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
-
-                    updateFBDB(curr_question, curr_hints);
-                    curr_hints = 0;
-                    curr_start_time = time;
-
-                    if (curr_question == 6) {   // all questions solved
-                        Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_LONG).show();
-                        questionNumber.setText(questions[curr_question]);
-                        hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Incorrect Passcode", Toast.LENGTH_LONG).show();
-                }
+                onClickNext();
             }
         });
 
@@ -169,16 +150,52 @@ public class QuestionFragment extends Fragment {
         return view;
     }
 
-    private void updateFBDB(final int curr_question, final int current_hints) {
+    private void onClickNext() {
+        if (passCode.getText().toString().trim().equals("")) {
+            Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_LONG).show();
+        } else {
+            String codeString = passCode.getText().toString().trim();
+            passCode.setText("");
+            passCode.setHint("Passcode");
+            if (curr_question < 6 && codeString.length()==6 && Integer.parseInt(codeString.substring(0,6)) == passcodes[curr_question] ) {
+                long time = Math.round(System.currentTimeMillis() / 1000);
+                curr_question++;
+
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt(Constants.CurrentQuestion, curr_question);
+                editor.putInt("Q" + curr_question + "Hints", curr_hints);
+                editor.putLong("Q" + curr_question + "Time", time); // end time of ques no. curr_ques
+                editor.commit();
+                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
+
+                updateFBDB(curr_question, curr_hints, curr_start_time, time);
+                curr_start_time = time;
+                curr_hints = 0;
+
+                if (curr_question == 6) {   // all questions solved
+                    Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_LONG).show();
+                    questionNumber.setText(questions[curr_question]);
+                    hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
+                }
+            } else {
+                Toast.makeText(getContext(), "Incorrect Passcode", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void updateFBDB(final int curr_question, final int current_hints, final  long start, final long end) {
         final DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
         final String key = pref.getString(com.coc.codehunt.Constants.Key, com.coc.codehunt.Constants.Key);
-        Log.e(TAG, "updateFBDB: key = " + key);
         teams.child(key).child(Constants.FB_CurrentQues).setValue(curr_question + 1);
-        long time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
-                pref.getLong("Q" + (curr_question - 1) + "Time", 0));
+//        long time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
+//                pref.getLong("Q" + (curr_question - 1) + "Time", 0));
+        long time = end - start;
         time += TeamData.calc_hint_time(current_hints);
         teams.child(key).child("q" + curr_question).setValue(time);
-
         Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
         Log.e(TAG, "onDataChange: q" + curr_question + " = " + time);
     }

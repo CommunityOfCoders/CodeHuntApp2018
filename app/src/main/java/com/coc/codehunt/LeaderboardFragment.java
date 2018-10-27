@@ -53,7 +53,7 @@ public class LeaderboardFragment extends Fragment {
                 leaderboardLinearLayout.removeAllViews();
 
                 leaderboardLinearLayout.addView(new LeaderboardRow(getContext(),
-                        "Team Name", "Rank", "Question", "Time", true));
+                        "Team Name", "Rank", "Question", "Time (s)", true));
 
                 int rank = 0;
                 for (TeamData team : teamDataArrayList) {

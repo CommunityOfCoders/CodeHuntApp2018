@@ -69,7 +69,6 @@ public class CodehuntActivity extends AppCompatActivity {
             Toast.makeText(this, "Please Enter Your Team Name!", Toast.LENGTH_LONG).show();
     }
 
-    @SuppressLint("ApplySharedPref")
     void init(String teamName) {
         String tN = pref.getString(Constants.TeamName, Constants.TeamName);
         Log.e(TAG, "init: tN = " + tN);
