@@ -2,7 +2,6 @@ package com.coc.codehunt;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,17 +18,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Objects;
 
-import static android.content.Context.CONTEXT_IGNORE_SECURITY;
 import static android.content.Context.MODE_PRIVATE;
 
 public class QuestionFragment extends Fragment {
@@ -65,16 +58,28 @@ public class QuestionFragment extends Fragment {
 
         curr_question = pref.getInt(com.coc.codehunt.Constants.CurrentQuestion, 0); // Real_Q-1
         curr_hints = pref.getInt("Q" + (curr_question + 1) + "Hints", 0);
-        curr_start_time = pref.getLong("Q" + curr_question + "Time", 0);
+        curr_start_time = pref.getLong("Q" + curr_question + "Time", System.currentTimeMillis() / 1000);
         Log.e(TAG, String.format("onCreateView: %d, %d, %d", curr_question, curr_hints, curr_start_time));
 
         if (curr_question >= 6) {
-            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
-            startActivity(i);
-            return view;
+//            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
+//            startActivity(i);
+////            return view;
+//            Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
+            passCode.setVisibility(View.GONE);
+            questionNumber.setText("WOAHHHH!!!");
+            nextButton.setEnabled(false);
+            nextButton.setVisibility(View.GONE);
+            hintsButton.setEnabled(false);
+            hintsButton.setVisibility(View.GONE);
+
+//            Intent intent = new Intent(getContext(), CodehuntActivity.class);
+//            startActivity(intent);
         }
         hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
-        questionNumber.setText(questions[curr_question]);
+
+        if (curr_question >= 0 && curr_question <= 5)
+            questionNumber.setText(questions[curr_question]);
 
         passCode.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
@@ -93,9 +98,9 @@ public class QuestionFragment extends Fragment {
 
     private void onClickHints() {
         if (curr_hints < 3) {
-            long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
+            long time = System.currentTimeMillis() / 1000;
             Log.e(TAG, "onCreateView: Time = " + time);
-            if (time >= curr_start_time + (curr_hints + 1) * 3) { // TODO Change to 300
+            if (time >= curr_start_time + (curr_hints + 1) * 300) { // TODO Change to 300
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                 alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
                 alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -147,11 +152,12 @@ public class QuestionFragment extends Fragment {
             passCode.setHint("Passcode");
             if (curr_question < 6 && codeString.length() == 6 && Integer.parseInt(codeString.substring(0, 6)) == passcodes[curr_question]) {
                 Log.e(TAG, "onClickNext: time = "+ Calendar.getInstance().getTimeInMillis());
-                long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
+                long time = System.currentTimeMillis() / 1000;
                 curr_question++;
 //                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
                 Log.e(TAG, "onClickNext: curr_start_time = " + curr_start_time);
                 Log.e(TAG, "onClickNext: time = " + time);
+                Log.e(TAG, "TIME: " + (time - curr_start_time));
                 updateFBDB(curr_question, curr_hints, curr_start_time, time);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt(Constants.CurrentQuestion, curr_question);
@@ -162,9 +168,12 @@ public class QuestionFragment extends Fragment {
                 curr_hints = 0;
 
                 if (curr_question == 6) {   // all questions solved
-                    Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
-                    startActivity(intent);
+                    questionNumber.setText("WOAHHHH!!!");
+                    passCode.setVisibility(View.GONE);
+                    nextButton.setEnabled(false);
+                    nextButton.setVisibility(View.GONE);
+                    hintsButton.setEnabled(false);
+                    hintsButton.setVisibility(View.GONE);
                 } else {
                     Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_LONG).show();
                     questionNumber.setText(questions[curr_question]);
