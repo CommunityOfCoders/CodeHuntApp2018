@@ -71,10 +71,17 @@ public class QuestionFragment extends Fragment {
         if (curr_question >= 6) {
 //            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
 //            startActivity(i);
-//            return view;
-            Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getContext(), CodehuntActivity.class);
-            startActivity(intent);
+////            return view;
+//            Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
+            passCode.setVisibility(View.GONE);
+            questionNumber.setText("WOAHHHH!!!");
+            nextButton.setEnabled(false);
+            nextButton.setVisibility(View.GONE);
+            hintsButton.setEnabled(false);
+            hintsButton.setVisibility(View.GONE);
+
+//            Intent intent = new Intent(getContext(), CodehuntActivity.class);
+//            startActivity(intent);
         }
         hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
 
@@ -170,9 +177,12 @@ public class QuestionFragment extends Fragment {
                 curr_hints = 0;
 
                 if (curr_question == 6) {   // all questions solved
-                    Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getContext(), CodehuntActivity.class);
-                    startActivity(intent);
+                    questionNumber.setText("WOAHHHH!!!");
+                    passCode.setVisibility(View.GONE);
+                    nextButton.setEnabled(false);
+                    nextButton.setVisibility(View.GONE);
+                    hintsButton.setEnabled(false);
+                    hintsButton.setVisibility(View.GONE);
                 } else {
                     Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_LONG).show();
                     questionNumber.setText(questions[curr_question]);
