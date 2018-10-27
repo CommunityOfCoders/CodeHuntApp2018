@@ -9,7 +9,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,18 @@ public class CodehuntActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_codehunt);
         TeamNameET = findViewById(R.id.TeamNameET);
+
+        TeamNameET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    onClickStart(TeamNameET);
+                    handled = true;
+                }
+                return handled;
+            }
+        });
     }
 
     public void onClickStart(View v) {
@@ -77,7 +91,7 @@ public class CodehuntActivity extends AppCompatActivity {
             editor.putString(Constants.TeamName, teamName);
             Log.e(TAG, "init: TN = "+teamName);
 
-            long startTime = Math.round(System.currentTimeMillis() / 1000);
+            long startTime = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
             editor.putLong("Q0Time", startTime);
             Log.e(TAG, "init: Q0Time = "+startTime);
 

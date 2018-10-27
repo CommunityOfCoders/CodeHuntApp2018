@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -74,61 +75,50 @@ public class QuestionFragment extends Fragment {
         hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
         questionNumber.setText(questions[curr_question]);
 
-        passCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    onClickNext();
-                    handled = true;
-                }
-                return handled;
-            }
-        });
-
-        nextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        passCode.setOnEditorActionListener((v, actionId, event) -> {
+            boolean handled = false;
+            if (actionId == EditorInfo.IME_ACTION_GO) {
                 onClickNext();
+                handled = true;
             }
+            return handled;
         });
 
-        hintsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (curr_hints < 3) {
-                    long time = Math.round(System.currentTimeMillis() / 1000);
-                    if (time >= curr_start_time + (curr_hints + 1) * 300) {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                        alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
-                        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                                alertDialogBuilder.setMessage("Ask a volunteer to give you a hint");
-                                alertDialogBuilder.setPositiveButton("Yes, the volunteer gave me a hint", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        curr_hints++;
-                                        pref.edit().putInt("Q" + curr_question + "Hints", curr_hints).commit();
-                                        hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
-                                    }
-                                });
-                                alertDialogBuilder.create().show();
-                            }
-                        });
-                        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        alertDialogBuilder.create().show();
-                    } else {
-                        Toast.makeText(getContext(), "Think!\nThere's still time before you are allowed to take a hint", Toast.LENGTH_LONG).show();
-                    }
+        nextButton.setOnClickListener(v -> onClickNext());
+
+        hintsButton.setOnClickListener(v -> {
+            if (curr_hints < 3) {
+                long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
+                if (time >= curr_start_time + (curr_hints + 1) * 3) { // TODO Change to 300
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                    alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
+                    alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                            alertDialogBuilder.setMessage("Ask a volunteer to give you a hint");
+                            alertDialogBuilder.setPositiveButton("Yes, the volunteer gave me a hint", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    curr_hints++;
+                                    pref.edit().putInt("Q" + curr_question + "Hints", curr_hints).commit();
+                                    hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
+                                }
+                            });
+                            alertDialogBuilder.create().show();
+                        }
+                    });
+                    alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    alertDialogBuilder.create().show();
                 } else {
-                    Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Think!\nThere's still time before you are allowed to take a hint", Toast.LENGTH_LONG).show();
                 }
+            } else {
+                Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_LONG).show();
             }
         });
         view.findViewById(R.id.rulesButton).setOnClickListener(new View.OnClickListener() {
@@ -158,17 +148,17 @@ public class QuestionFragment extends Fragment {
             passCode.setText("");
             passCode.setHint("Passcode");
             if (curr_question < 6 && codeString.length()==6 && Integer.parseInt(codeString.substring(0,6)) == passcodes[curr_question] ) {
-                long time = Math.round(System.currentTimeMillis() / 1000);
+                long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
                 curr_question++;
-
+//                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
+                Log.e(TAG, "onClickNext: curr_start_time = "+curr_start_time);
+                Log.e(TAG, "onClickNext: time = "+time);
+                updateFBDB(curr_question, curr_hints, curr_start_time, time);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt(Constants.CurrentQuestion, curr_question);
                 editor.putInt("Q" + curr_question + "Hints", curr_hints);
                 editor.putLong("Q" + curr_question + "Time", time); // end time of ques no. curr_ques
                 editor.commit();
-                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
-
-                updateFBDB(curr_question, curr_hints, curr_start_time, time);
                 curr_start_time = time;
                 curr_hints = 0;
 
@@ -188,12 +178,15 @@ public class QuestionFragment extends Fragment {
     }
 
     private void updateFBDB(final int curr_question, final int current_hints, final  long start, final long end) {
+        long time = end - start;
         final DatabaseReference teams = FirebaseDatabase.getInstance().getReference().child("teams");
         final String key = pref.getString(com.coc.codehunt.Constants.Key, com.coc.codehunt.Constants.Key);
         teams.child(key).child(Constants.FB_CurrentQues).setValue(curr_question + 1);
 //        long time = (int) (pref.getLong("Q" + curr_question + "Time", 0) -
 //                pref.getLong("Q" + (curr_question - 1) + "Time", 0));
-        long time = end - start;
+        Log.e(TAG, "updateFBDB: start = "+start);
+        Log.e(TAG, "updateFBDB: end = "+end);
+        Log.e(TAG, "updateFBDB: hintsPenalty = "+ TeamData.calc_hint_time(current_hints));
         time += TeamData.calc_hint_time(current_hints);
         teams.child(key).child("q" + curr_question).setValue(time);
         Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
