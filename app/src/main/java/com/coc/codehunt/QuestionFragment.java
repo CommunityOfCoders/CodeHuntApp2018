@@ -75,73 +75,79 @@ public class QuestionFragment extends Fragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if (passCode.getText().toString().equals("")) {
-                Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            int code = Integer.parseInt(passCode.getText().toString());
-            passCode.setText("");
-            passCode.setHint("Passcode");
-            if (curr_question < 6 && code == passcodes[curr_question]) {
-                long time = Math.round(System.currentTimeMillis() / 1000);
-                curr_question++;
-
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putInt(Constants.CurrentQuestion, curr_question);
-                editor.putInt("Q" + curr_question + "Hints", curr_hints);
-                editor.putLong("Q" + curr_question + "Time", time); // end time of ques no. curr_ques
-                editor.commit();
-                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
-
-                updateFBDB(curr_question, curr_hints);
-                curr_hints = 0;
-                curr_start_time = time;
-
-                if (curr_question == 6) {   // all questions solved
-                    Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_SHORT).show();
-                    questionNumber.setText(questions[curr_question]);
-                    hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
+                if (passCode.getText().toString().equals("")) {
+                    Toast.makeText(getContext(), "Please Enter the Passcode", Toast.LENGTH_LONG).show();
+                    return;
                 }
-            } else {
-                Toast.makeText(getContext(), "Incorrect Passcode", Toast.LENGTH_SHORT).show();
-            }
+                int code = Integer.parseInt(passCode.getText().toString());
+                passCode.setText("");
+                passCode.setHint("Passcode");
+                if (curr_question < 6 && code == passcodes[curr_question]) {
+                    long time = Math.round(System.currentTimeMillis() / 1000);
+                    curr_question++;
+
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putInt(Constants.CurrentQuestion, curr_question);
+                    editor.putInt("Q" + curr_question + "Hints", curr_hints);
+                    editor.putLong("Q" + curr_question + "Time", time); // end time of ques no. curr_ques
+                    editor.commit();
+                    Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
+
+                    updateFBDB(curr_question, curr_hints);
+                    curr_hints = 0;
+                    curr_start_time = time;
+
+                    if (curr_question == 6) {   // all questions solved
+                        Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_LONG).show();
+                        questionNumber.setText(questions[curr_question]);
+                        hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Incorrect Passcode", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         hintsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if (curr_hints < 3) {
-                long time = Math.round(System.currentTimeMillis() / 1000);
-                if(time >= curr_start_time + (curr_hints+1)*300) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                    alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
-                    alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(getContext(), "Ask a volunteer to give you a hint", Toast.LENGTH_SHORT).show();
-                            curr_hints++;
-                            pref.edit().putInt("Q" + curr_question + "Hints", curr_hints).commit();
-                            hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
-                        }
-                    });
-                    alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                    alertDialogBuilder.create().show();
+                if (curr_hints < 3) {
+                    long time = Math.round(System.currentTimeMillis() / 1000);
+                    if (time >= curr_start_time + (curr_hints + 1) * 300) {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                        alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
+                        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                                alertDialogBuilder.setMessage("Ask a volunteer to give you a hint");
+                                alertDialogBuilder.setPositiveButton("Yes, the volunteer gave me a hint", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        curr_hints++;
+                                        pref.edit().putInt("Q" + curr_question + "Hints", curr_hints).commit();
+                                        hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
+                                    }
+                                });
+                                alertDialogBuilder.create().show();
+                            }
+                        });
+                        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                        alertDialogBuilder.create().show();
+                    } else {
+                        Toast.makeText(getContext(), "Think!\nThere's still time before you are allowed to take a hint", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_LONG).show();
                 }
-                else {
-                    Toast.makeText(getContext(), "Think!\nThere's still time before you are allowed to take a hint", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), "You don't have any hints left...", Toast.LENGTH_SHORT).show();
-            }
             }
         });
         view.findViewById(R.id.rulesButton).setOnClickListener(new View.OnClickListener() {

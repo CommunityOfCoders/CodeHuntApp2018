@@ -54,7 +54,7 @@ public class CodehuntActivity extends AppCompatActivity {
                     init(teamName);
                     Log.e(TAG, "onClick: TeamName"+teamName );
                     Intent intent = new Intent(CodehuntActivity.this, MainActivity.class);
-                    Toast.makeText(CodehuntActivity.this, "All the Best!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CodehuntActivity.this, "All the Best!", Toast.LENGTH_LONG).show();
                     startActivity(intent);
                 }
             });
@@ -66,7 +66,7 @@ public class CodehuntActivity extends AppCompatActivity {
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
         } else
-            Toast.makeText(this, "Please Enter Your Team Name!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please Enter Your Team Name!", Toast.LENGTH_LONG).show();
     }
 
     @SuppressLint("ApplySharedPref")

@@ -3,17 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    <TextView
+        android:id="@+id/titleTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:paddingTop="8dp"
+        android:paddingBottom="0dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:text="Rules Regarding The Hints" />
 
     <TextView
         android:id="@+id/text"
-        android:layout_margin="16dp"
+        android:padding="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="1.	You may ask the volunteers for hints at any point while solving the clue(s).
-2.	You are allowed to ask three hints at the most; after 5, 10, and 15 minutes after the time of your arrival at the location.
-3.	As you have been briefed about, we’re timing your Hunt ever since you began. For each hint asked for in this question, an additional time of 3, 5, and 7 minutes respectively shall be added to your total time for the corresponding hint taken. (The team to have the minimum total time at the end of CodeHunt wins)
-4.	Neither hints nor time penalties shall be given after the third hint is exhausted. You may still try solving the clue."/>
+        android:text="@string/hint_rules"/>
 
     <TextView
         android:id="@+id/dialogOK"
@@ -22,9 +33,9 @@
         app:layout_constraintTop_toBottomOf="@+id/text"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_margin="8dp"
-        android:textColor="@color/black"
-        android:textSize="24sp"
+        android:paddingBottom="16dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
         android:text="OK" />
 
 

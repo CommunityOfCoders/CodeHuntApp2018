@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">CODEHUNT 2K18</string>
+    <string name="app_name">CODEHUNT 2k18</string>
     <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="hint_rules">1.\tYou may ask the volunteers for hints at any point while solving the clue(s).\n
+2.\tYou are allowed to ask three hints at the most; after 5, 10, and 15 minutes after the time of your arrival at the location.\n
+3.\tAs you have been briefed about, we’re timing your Hunt ever since you began. For each hint asked for in this question, an additional time of 3, 5, and 7 minutes respectively shall be added to your total time for the corresponding hint taken. (The team to have the minimum total time at the end of CodeHunt wins)\n
+4.\tNeither hints nor time penalties shall be given after the third hint is exhausted. You may still try solving the clue.\n</string>
 </resources>

@@ -40,6 +40,6 @@ public class Finish extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Toast.makeText(this, "You've Completed the Hunt!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "You've Completed the Hunt!", Toast.LENGTH_LONG).show();
     }
 }
