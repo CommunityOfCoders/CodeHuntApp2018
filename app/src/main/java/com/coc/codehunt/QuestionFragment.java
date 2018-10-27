@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +66,7 @@ public class QuestionFragment extends Fragment {
 
         curr_question = pref.getInt(com.coc.codehunt.Constants.CurrentQuestion, 0); // Real_Q-1
         curr_hints = pref.getInt("Q" + (curr_question + 1) + "Hints", 0);
-        curr_start_time = pref.getLong("Q" + curr_question + "Time", 0);
+        curr_start_time = pref.getLong("Q" + curr_question + "Time", System.currentTimeMillis() / 1000);
         Log.e(TAG, String.format("onCreateView: %d, %d, %d", curr_question, curr_hints, curr_start_time));
 
         if (curr_question >= 6) {
@@ -105,9 +106,9 @@ public class QuestionFragment extends Fragment {
 
     private void onClickHints() {
         if (curr_hints < 3) {
-            long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
+            long time = System.currentTimeMillis() / 1000;
             Log.e(TAG, "onCreateView: Time = " + time);
-            if (time >= curr_start_time + (curr_hints + 1) * 3) { // TODO Change to 300
+            if (time >= curr_start_time + (curr_hints + 1) * 300) { // TODO Change to 300
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                 alertDialogBuilder.setMessage("Are you sure you want to take a hint?");
                 alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -162,11 +163,12 @@ public class QuestionFragment extends Fragment {
             passCode.setText("");
             passCode.setHint("Passcode");
             if (curr_question < 6 && codeString.length() == 6 && Integer.parseInt(codeString.substring(0, 6)) == passcodes[curr_question]) {
-                long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
+                long time = System.currentTimeMillis() / 1000;
                 curr_question++;
 //                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
                 Log.e(TAG, "onClickNext: curr_start_time = " + curr_start_time);
                 Log.e(TAG, "onClickNext: time = " + time);
+                Log.e(TAG, "TIME: " + (time - curr_start_time));
                 updateFBDB(curr_question, curr_hints, curr_start_time, time);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt(Constants.CurrentQuestion, curr_question);
