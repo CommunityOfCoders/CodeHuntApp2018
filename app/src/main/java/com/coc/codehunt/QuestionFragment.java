@@ -114,11 +114,7 @@ public class QuestionFragment extends Fragment {
                         alertDialogBuilder.create().show();
                     }
                 });
-                alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
+                alertDialogBuilder.setNegativeButton("No", (dialog, which) -> { });
                 alertDialogBuilder.create().show();
             } else {
                 Toast.makeText(getContext(), "Think!\nThere's still time before you are allowed to take a hint", Toast.LENGTH_LONG).show();
@@ -150,6 +146,7 @@ public class QuestionFragment extends Fragment {
             passCode.setText("");
             passCode.setHint("Passcode");
             if (curr_question < 6 && codeString.length() == 6 && Integer.parseInt(codeString.substring(0, 6)) == passcodes[curr_question]) {
+                Log.e(TAG, "onClickNext: time = "+ Calendar.getInstance().getTimeInMillis());
                 long time = Math.round(Calendar.getInstance().getTimeInMillis() / 1000);
                 curr_question++;
 //                Log.e(TAG, String.format("onClick: %d, %d, %d", curr_question, curr_hints, time));
@@ -194,5 +191,4 @@ public class QuestionFragment extends Fragment {
         Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
         Log.e(TAG, "onDataChange: q" + curr_question + " = " + time);
     }
-
 }
