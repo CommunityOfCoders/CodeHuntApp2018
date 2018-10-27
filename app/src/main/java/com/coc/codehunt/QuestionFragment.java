@@ -72,7 +72,6 @@ public class QuestionFragment extends Fragment {
 //            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
 //            startActivity(i);
 //            return view;
-            curr_question = -1;
             Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getContext(), CodehuntActivity.class);
             startActivity(intent);
@@ -171,8 +170,8 @@ public class QuestionFragment extends Fragment {
                 curr_hints = 0;
 
                 if (curr_question == 6) {   // all questions solved
-                    Toast.makeText(getContext(), "Congratulations!", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(getActivity(), com.coc.codehunt.Finish.class);
+                    Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getContext(), CodehuntActivity.class);
                     startActivity(intent);
                 } else {
                     Toast.makeText(getContext(), "Great Going!", Toast.LENGTH_LONG).show();
