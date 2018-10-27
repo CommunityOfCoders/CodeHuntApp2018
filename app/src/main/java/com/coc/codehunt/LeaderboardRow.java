@@ -2,8 +2,10 @@ package com.coc.codehunt;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
@@ -14,7 +16,7 @@ public class LeaderboardRow extends ConstraintLayout {
     }
 
     @SuppressLint("SetTextI18n")
-    public LeaderboardRow(Context context, String teamName, String rank, String questionNo, String time, boolean header) {
+    public LeaderboardRow(Context context, String teamName, String rank, String questionNo, String time, boolean bold, boolean header) {
         super(context);
         TextView TeamName, Time, Rank, QuestionNo;
         LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -27,15 +29,24 @@ public class LeaderboardRow extends ConstraintLayout {
         Rank.setText(rank);
         QuestionNo.setText(questionNo);
         Time.setText(time);
-        if(header) {
+        if(bold) {
             TeamName.setTextColor(getResources().getColor(R.color.black));
             Rank.setTextColor(getResources().getColor(R.color.black));
             QuestionNo.setTextColor(getResources().getColor(R.color.black));
             Time.setTextColor(getResources().getColor(R.color.black));
         }
+        if(header) {
+            TeamName.setPaintFlags(TeamName.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+            Rank.setPaintFlags(Rank.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+            QuestionNo.setPaintFlags(QuestionNo.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+            Time.setPaintFlags(Time.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        }
     }
 
     public LeaderboardRow(Context context, String teamName, String rank, String questionNo, String time) {
-        this(context, teamName, rank, questionNo, time, false);
+        this(context, teamName, rank, questionNo, time, false, false);
+    }
+    public LeaderboardRow(Context context, String teamName, String rank, String questionNo, String time, boolean bold) {
+        this(context, teamName, rank, questionNo, time, bold, false);
     }
 }

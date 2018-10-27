@@ -67,7 +67,7 @@ public class QuestionFragment extends Fragment {
 ////            return view;
 //            Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
             passCode.setVisibility(View.GONE);
-            questionNumber.setText("WOAHHHH!!!");
+            questionNumber.setText("CONGRATULATIONS!!!");
             nextButton.setEnabled(false);
             nextButton.setVisibility(View.GONE);
             hintsButton.setEnabled(false);
@@ -168,7 +168,7 @@ public class QuestionFragment extends Fragment {
                 curr_hints = 0;
 
                 if (curr_question == 6) {   // all questions solved
-                    questionNumber.setText("WOAHHHH!!!");
+                    questionNumber.setText("CONGRATULATIONS!!!");
                     passCode.setVisibility(View.GONE);
                     nextButton.setEnabled(false);
                     nextButton.setVisibility(View.GONE);

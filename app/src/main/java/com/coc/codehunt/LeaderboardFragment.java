@@ -1,6 +1,7 @@
 package com.coc.codehunt;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,9 +24,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class LeaderboardFragment extends Fragment {
     private static final String TAG = "LeaderboardFragment";
     FirebaseDatabase database;
+    SharedPreferences preferences;
     ArrayList<TeamData> teamDataArrayList;
     LinearLayout leaderboardLinearLayout;
 
@@ -37,6 +41,7 @@ public class LeaderboardFragment extends Fragment {
 //        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         database = FirebaseDatabase.getInstance();
         teamDataArrayList = new ArrayList<>();
+        preferences = getContext().getSharedPreferences(Constants.SP, MODE_PRIVATE);
         DatabaseReference teams = database.getReference("teams");
         teams.keepSynced(true);
         teams.addValueEventListener(new ValueEventListener() {
@@ -53,14 +58,20 @@ public class LeaderboardFragment extends Fragment {
                 leaderboardLinearLayout.removeAllViews();
 
                 leaderboardLinearLayout.addView(new LeaderboardRow(getContext(),
-                        "Team Name", "Rank", "Question", "Time (s)", true));
+                        "Team Name", "Rank", "Question", "Time (s)", true, true));
 
                 int rank = 0;
+
                 for (TeamData team : teamDataArrayList) {
                     if(team.name!= null && !team.name.trim().equals(""))
-                        leaderboardLinearLayout.addView(new LeaderboardRow(
-                                getContext(), team.name, Integer.toString(++rank),
-                                Integer.toString(team.current_ques), Integer.toString(team.getTotalTime())));
+                        if(team.name.equals(preferences.getString(Constants.TeamName, "")))
+                            leaderboardLinearLayout.addView(new LeaderboardRow(
+                                    getContext(), team.name, Integer.toString(++rank),
+                                    Integer.toString(team.current_ques), Integer.toString(team.getTotalTime()), true));
+                        else
+                            leaderboardLinearLayout.addView(new LeaderboardRow(
+                                    getContext(), team.name, Integer.toString(++rank),
+                                    Integer.toString(team.current_ques), Integer.toString(team.getTotalTime())));
                 }
             }
 
