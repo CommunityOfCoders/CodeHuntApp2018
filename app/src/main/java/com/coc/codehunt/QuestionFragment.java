@@ -211,5 +211,4 @@ public class QuestionFragment extends Fragment {
         Log.e(TAG, "onDataChange: curr_ques = " + (curr_question + 1));
         Log.e(TAG, "onDataChange: q" + curr_question + " = " + time);
     }
-
 }
