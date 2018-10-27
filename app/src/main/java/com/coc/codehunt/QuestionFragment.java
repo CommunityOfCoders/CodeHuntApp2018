@@ -69,12 +69,18 @@ public class QuestionFragment extends Fragment {
         Log.e(TAG, String.format("onCreateView: %d, %d, %d", curr_question, curr_hints, curr_start_time));
 
         if (curr_question >= 6) {
-            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
-            startActivity(i);
-            return view;
+//            Intent i = new Intent(getContext(), com.coc.codehunt.Finish.class);
+//            startActivity(i);
+//            return view;
+            curr_question = -1;
+            Toast.makeText(getContext(), "WOAH You did it!!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getContext(), CodehuntActivity.class);
+            startActivity(intent);
         }
         hintsButton.setText(String.format(Locale.ENGLISH, "TAKE A HINT (%d LEFT)", 3 - curr_hints));
-        questionNumber.setText(questions[curr_question]);
+
+        if (curr_question >= 0 && curr_question <= 5)
+            questionNumber.setText(questions[curr_question]);
 
         passCode.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
